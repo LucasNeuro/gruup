@@ -1,9 +1,8 @@
-from mistralai.client import MistralClient
-from mistralai.models.chat_completion import ChatMessage
+from mistralai import Mistral
 from app.config import MISTRAL_API_KEY
 import json
 
-client = MistralClient(api_key=MISTRAL_API_KEY)
+client = Mistral(api_key=MISTRAL_API_KEY)
 
 def analyze_lead_message(message: str) -> dict:
     prompt = f"""
@@ -18,16 +17,19 @@ def analyze_lead_message(message: str) -> dict:
     """
     
     messages = [
-        ChatMessage(role="user", content=prompt)
+        {
+            "role": "user",
+            "content": prompt
+        }
     ]
     
-    chat_response = client.chat(
-        model="mistral-large-latest",
-        messages=messages,
-        response_format={"type": "json_object"}
-    )
-    
     try:
+        chat_response = client.chat.complete(
+            model="mistral-large-latest",
+            messages=messages,
+            response_format={"type": "json_object"}
+        )
+        
         content = chat_response.choices[0].message.content
         return json.loads(content)
     except Exception as e:
@@ -50,12 +52,19 @@ def generate_handover_summary(lead_name: str, history: str) -> str:
     """
     
     messages = [
-        ChatMessage(role="user", content=prompt)
+        {
+            "role": "user", 
+            "content": prompt
+        }
     ]
     
-    chat_response = client.chat(
-        model="mistral-large-latest",
-        messages=messages
-    )
-    
-    return chat_response.choices[0].message.content
+    try:
+        chat_response = client.chat.complete(
+            model="mistral-large-latest",
+            messages=messages
+        )
+        
+        return chat_response.choices[0].message.content
+    except Exception as e:
+        print(f"Error generating summary: {e}")
+        return "Não foi possível gerar o resumo."
