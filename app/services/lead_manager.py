@@ -61,9 +61,8 @@ async def process_message(payload: dict):
     if h_response.data:
         for item in h_response.data:
             role = "user"
-            if item["direcao"] == "out_ai":
-                role = "assistant"
-            elif item["direcao"] == "out":
+            # Se for saída (out), assumimos que foi o assistente ou vendedor falando
+            if item["direcao"] == "out":
                 role = "assistant"
                 
             history_messages.append({"role": role, "content": item["mensagem"]})
@@ -75,9 +74,9 @@ async def process_message(payload: dict):
     if agent_result.get("response"):
         log_ai = {
             "lead_id": lead_id,
-            "direcao": "out_ai",
+            "direcao": "out", # Usando 'out' pois o banco tem restrição (check constraint)
             "mensagem": agent_result["response"],
-            "resumo_ia": ""
+            "resumo_ia": "Resposta Automática IA"
         }
         supabase.table("historico_conversas").insert(log_ai).execute()
 
