@@ -1,5 +1,5 @@
 from app.services.supabase_client import get_supabase_client
-from app.services.mistral_client import chat_with_agent
+from app.services.mistral_client import chat_with_agent, generate_handover_summary
 import random
 
 supabase = get_supabase_client()
